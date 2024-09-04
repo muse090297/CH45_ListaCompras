@@ -1,4 +1,5 @@
 const btnAgregar = document.getElementById("btnAgregar");
+const btnClear = document.getElementById("btnClear")
 const txtNombre =  document.getElementById("Name");
 const txtNumber =  document.getElementById("Number");
 const alertValidaciones = document.getElementById("alertValidaciones")
@@ -16,6 +17,9 @@ let contador = 0;
 let precio = 0;
 let costoTotal = 0;
 let TotalEnProductos = 0;
+
+//Definimos un arreglo para guardar la tabla en LocalStorage
+let datos = new Array();
 
 function validarCantidad(){
     //Validamos que el campo Cantidad tenga al menos un caracter
@@ -81,6 +85,18 @@ btnAgregar.addEventListener("click", function(event){
                     <td>${txtNumber.value}</td>
                     <td>${precio}</td>
         </tr>`;
+
+        //Creamos elemento con la info de cada producto
+        let elemento = {"contador":contador,
+                        "nombre": txtNombre.value,
+                        "cantidad": txtNumber.value,
+                        "precio": precio};
+        
+        //Ponemos el elemento creado en el arreglo datos
+        datos.push(elemento);
+        //Convertimos el objeto en string y lo guardamos
+        localStorage.setItem("datos", JSON.stringify(datos));
+
         cuerpoTabla.insertAdjacentHTML("beforeend", row);
         //Una vez que garegamos el producto, limpiamos los campos de nombre y cantidad
         
@@ -104,6 +120,46 @@ btnAgregar.addEventListener("click", function(event){
     
 }); //btnAgregar.addEventListener
 
+    //Declaramos la funcionalidad del boton Limpiar todo
+
+    btnClear.addEventListener("click", function(event){
+        event.preventDefault();
+        //Limpiar el valor de los campos
+        txtNombre.value="";
+        txtNumber.value="";
+        //Limpiamos la info de LocalStorage
+        //Esta forma elimina campo por campo la info
+        localStorage.removeItem("TotalEnProductos");
+        localStorage.removeItem("costoTotal")
+        localStorage.removeItem("contador")
+
+        //De esta manera se elimina todo el contenido de Local Storage
+        localStorage.clear();
+
+        //Limpiar la Tabla
+        cuerpoTabla.innerHTML="";
+
+        //Reinciamos las variables
+        contador = 0;
+        costoTotal = 0;
+        TotalEnProductos = 0;
+
+        //Asignar las variables a los divs
+        contadorProductos.innerText = contador;
+        productosTotal.innerText=TotalEnProductos;
+        precioTotal.innerText="$ "+costoTotal.toFixed(2);
+
+        //Ocultar la alerta 
+        alertValidacionesTexto.innerHTML = "";
+        alertValidaciones.style.display="none";
+
+        //Quitar los bordes
+        txtNombre.style.border="";
+        txtNumber.style.border="";
+        
+
+    })
+
 //Metodo para quitar los espacios
 //Evento blur es cuando un campo pierde el foco, se sale del campo
 txtNombre.addEventListener("blur", function(event){
@@ -125,5 +181,22 @@ window.addEventListener("load",function(){
 
     contadorProductos.innerText = contador;
     productosTotal.innerText=TotalEnProductos;
-    precioTotal.innerText="$ "+costoTotal;
+    precioTotal.innerText="$ "+costoTotal.toFixed(2);
+
+    //este es para ver si hay info de datos en LocalStorage
+    if(this.localStorage.getItem("datos") != null){
+        datos = JSON.parse(this.localStorage.getItem("datos"))
+    }
+
+    //Recorrer el arreglo
+    datos.forEach(r => {
+        let row = `<tr>
+                    <td>${r.contador}</td>
+                    <td>${r.nombre}</td>
+                    <td>${r.cantidad}</td>
+                    <td>${r.precio}</td>
+                   </tr>`
+    });
+
+    cuerpoTabla.insertAdjacentHTML("beforeend",row);
 })
